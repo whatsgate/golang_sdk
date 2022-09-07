@@ -1,0 +1,791 @@
+openapi: 3.0.2
+info:
+  title: API whatsgate.ru
+  description: Интерфейс для взаимодействия с клиентом Whatsapp
+  contact:
+    name: Whatsgate API
+    url: https://whatsgate.ru/
+  version: 1.0.0
+servers:
+- url: https://whatsgate.ru/v1
+  description: V1 API server
+paths:
+  /send:
+    post:
+      tags:
+      - Сообщения
+      summary: Отправка сообщения
+      operationId: sendMessage
+      requestBody:
+        description: "Отправляет текстовое или мультимедийное сообщение контакту л\
+          ибо группе. Может использоваться синхронно (возвращает ответ после отпра\
+          вки сообщения, ответ содержит объект отправленного сообщения с идентифик\
+          атором), либо асинхронно (ответ содержит результат постановки в очередь\
+          , а отправленное сообщение приходит на указанный webhook). По умолчанию\
+          \ используется асинхронная отправка."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/send_body'
+            examples:
+              textMessage:
+                value:
+                  WhatsappID: YOUR_WHATSAPP_ID
+                  async: false
+                  recipient:
+                    id: 79999999999@c.us
+                  message:
+                    body: Hello world!
+              replyMessage:
+                value:
+                  WhatsappID: YOUR_WHATSAPP_ID
+                  async: false
+                  recipient:
+                    id: 79999999999@c.us
+                  message:
+                    body: Hello world!
+                    quote: false_79999999999@c.us_61F01FFD52308DC65FDF4D8EA369526C
+              sendImage:
+                value:
+                  WhatsappID: YOUR_WHATSAPP_ID
+                  async: true
+                  recipient:
+                    id: 79999999999@c.us
+                  message:
+                    body: Hello world!
+                    type: image
+                    media:
+                      mimetype: image/png
+                      data: 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
+                      filename: bird.png
+              sendToGroup:
+                value:
+                  WhatsappID: YOUR_WHATSAPP_ID
+                  async: true
+                  recipient:
+                    number: "111111111111111111"
+                    type: group
+                  message:
+                    body: Hello group!
+        required: true
+      responses:
+        "200":
+          description: Успешное завершение запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200'
+              examples:
+                sync:
+                  value:
+                    result:
+                      id: true_79999999999@c.us_3DB0F5D953FBA2806CB5
+                      ack: 0
+                      hasMedia: false
+                      mediaKey: ""
+                      body: Hello world!
+                      type: chat
+                      timestamp: 1660217895
+                      from: 79999999999@c.us
+                      to: 79999999999@c.us
+                      isForwarded: false
+                async:
+                  value:
+                    result: OK
+        "401":
+          description: Не авторизован. Не указан или указан некорректный токен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                AuthError:
+                  value:
+                    name: Unauthorized
+                    message: Your request was made with invalid credentials.
+                    code: 0
+                    status: 401
+        "500":
+          description: Ошибка запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Error:
+                  value:
+                    name: Unauthorized
+                    message: Your request was made with invalid credentials.
+                    code: 0
+      security:
+      - ApiKeyAuth: []
+  /check:
+    post:
+      tags:
+      - Контакты
+      summary: Проверка зарегистрирован ли номер в WhatsApp
+      requestBody:
+        description: "Проверяет, зарегистрирован ли указанный номер в WhatsApp. Но\
+          мер указывается в формате только цифр, например 79999999999"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/check_body'
+            examples:
+              CheckNumber:
+                value:
+                  WhatsappID: YOUR_WHATSAPP_ID
+                  number: "79999999999"
+        required: true
+      responses:
+        "200":
+          description: Успешное завершение запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_1'
+              examples:
+                ok:
+                  value:
+                    result: OK
+                    data: true
+        "401":
+          description: Не авторизован. Не указан или указан некорректный токен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                AuthError:
+                  value:
+                    name: Unauthorized
+                    message: Your request was made with invalid credentials.
+                    code: 0
+                    status: 401
+        "500":
+          description: Ошибка запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Error:
+                  value:
+                    name: Unauthorized
+                    message: Your request was made with invalid credentials.
+                    code: 0
+      security:
+      - ApiKeyAuth: []
+  /get-chats:
+    post:
+      tags:
+      - Контакты
+      summary: Возвращает список активных чатов
+      requestBody:
+        description: "Запрашивает и возвращает список активных чатов, включая конт\
+          акты и группы. В объекте группы находится идентификатор группы, список в\
+          сех участников группы, права участников (является ли участник администра\
+          тором группы)."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getchats_body'
+            examples:
+              CheckNumber:
+                value:
+                  WhatsappID: YOUR_WHATSAPP_ID
+        required: true
+      responses:
+        "200":
+          description: Успешное завершение запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_2'
+              examples:
+                ok:
+                  value:
+                    result: OK
+                    data:
+                    - id: 79999999999@c.us
+                      name: +7 (999) 999-99-99
+                      isGroup: "false,"
+                      isReadOnly: "false,"
+                      unreadCount: "0,"
+                      timestamp: "1660218976,"
+                      pinned: "false,"
+                      isMuted: "false,"
+                      muteExpiration: 0
+                    - id: 120363023014360921@g.us
+                      name: Тестовая группа
+                      isGroup: "true,"
+                      isReadOnly: "true,"
+                      unreadCount: "1,"
+                      timestamp: "1659989095,"
+                      pinned: "false,"
+                      isMuted: "false,"
+                      muteExpiration: "0,"
+                      groupMetadata:
+                        id: 120363023014360921@g.us
+                        creation: "1658328976,"
+                        owner: 79999999999@c.us
+                        size: 1
+                        participants:
+                        - id: 79999999999@c.us
+                          isAdmin: true
+                          isSuperAdmin: false
+        "401":
+          description: Не авторизован. Не указан или указан некорректный токен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                AuthError:
+                  value:
+                    name: Unauthorized
+                    message: Your request was made with invalid credentials.
+                    code: 0
+                    status: 401
+        "500":
+          description: Ошибка запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Error:
+                  value:
+                    name: Unauthorized
+                    message: Your request was made with invalid credentials.
+                    code: 0
+      security:
+      - ApiKeyAuth: []
+  /get-media:
+    post:
+      tags:
+      - Медиа-файлы
+      summary: "Возвращает объект медиафайла, прикрепленного к сообщению"
+      requestBody:
+        description: "Запрашивает и возвращает медиа-файл, прикрепленный к сообщен\
+          ию по идентификатору mediaKey."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getmedia_body'
+            examples:
+              Getmedia:
+                value:
+                  WhatsappID: YOUR_WHATSAPP_ID
+                  mediaKey: TuM9wXQZBmERUCzwnIZe80GwZ5lPDIDsNE+vewnAxho=
+        required: true
+      responses:
+        "200":
+          description: Успешное завершение запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_3'
+              examples:
+                ok:
+                  value:
+                    result: OK
+                    media:
+                      mimetype: image/jpeg
+                      data: base64_encoded_data
+        "401":
+          description: Не авторизован. Не указан или указан некорректный токен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                AuthError:
+                  value:
+                    name: Unauthorized
+                    message: Your request was made with invalid credentials.
+                    code: 0
+                    status: 401
+        "500":
+          description: Ошибка запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Error:
+                  value:
+                    name: Unauthorized
+                    message: Your request was made with invalid credentials.
+                    code: 0
+      security:
+      - ApiKeyAuth: []
+  /seen:
+    post:
+      tags:
+      - Сообщения
+      summary: "Отправляет команду в чат, что последние сообщения просмотрены"
+      requestBody:
+        description: Команда устанавливает у всех сообщений в указанном чате статус
+          просмотрены.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/seen_body'
+            examples:
+              sendseentochat:
+                value:
+                  WhatsappID: YOUR_WHATSAPP_ID
+                  recipient:
+                    id: 79999999999@c.us
+        required: true
+      responses:
+        "200":
+          description: Успешное завершение запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_200_4'
+              examples:
+                ok:
+                  value:
+                    result: OK
+        "401":
+          description: Не авторизован. Не указан или указан некорректный токен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                AuthError:
+                  value:
+                    name: Unauthorized
+                    message: Your request was made with invalid credentials.
+                    code: 0
+                    status: 401
+        "500":
+          description: Ошибка запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              examples:
+                Error:
+                  value:
+                    name: Unauthorized
+                    message: Your request was made with invalid credentials.
+                    code: 0
+      security:
+      - ApiKeyAuth: []
+components:
+  schemas:
+    recipientId:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+          description: Whatsapp recipient ID with @c.us or @g.us
+    recipientNum:
+      required:
+      - number
+      type: object
+      properties:
+        number:
+          type: string
+          description: Recipient number
+        type:
+          type: string
+          description: "Recipient type, group or contact"
+          enum:
+          - group
+          - contact
+          default: contact
+    messageText:
+      required:
+      - body
+      type: object
+      properties:
+        body:
+          type: string
+        quote:
+          type: string
+        type:
+          type: string
+          enum:
+          - text
+          default: text
+    messageMedia:
+      type: object
+      properties:
+        body:
+          type: string
+        quote:
+          type: string
+        type:
+          type: string
+          enum:
+          - image
+          - sticker
+          - doc
+          - voice
+        media:
+          $ref: '#/components/schemas/media'
+    media:
+      required:
+      - data
+      - filename
+      - mimetype
+      type: object
+      properties:
+        mimetype:
+          type: string
+          description: Mime type of file
+          enum:
+          - application/ogg
+          - application/pdf
+          - application/zip
+          - application/gzip
+          - application/msword
+          - audio/mp4
+          - audio/aac
+          - audio/mpeg
+          - audio/ogg
+          - audio/webm
+          - image/gif
+          - image/jpeg
+          - image/pjpeg
+          - image/png
+          - image/svg+xml
+          - image/tiff
+          - image/webp
+          - video/mpeg
+          - video/mp4
+          - video/ogg
+          - video/quicktime
+          - video/webm
+          - video/x-ms-wmv
+          - video/x-flv
+          - application/vnd.ms-excel
+          - application/vnd.ms-powerpoint
+          - application/msword
+        data:
+          type: string
+          description: Base64 encoded data file body
+        filename:
+          type: string
+          description: Name of the file
+      example:
+        filename: filename
+        data: data
+        mimetype: application/ogg
+    error:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Наименование ошибки
+        message:
+          type: string
+          description: Текст ошибки
+        code:
+          type: integer
+        status:
+          type: integer
+    ResponseMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Идентификатор сообщения
+        ack:
+          type: integer
+          description: Флаг просмотра сообщения
+        hasMedia:
+          type: boolean
+          description: "Флаг, имеет ли сообщение медиафайл"
+        mediaKey:
+          type: string
+          description: Ключ медиафайла (при наличии)
+        body:
+          type: string
+          description: Текст сообщения
+        type:
+          type: string
+          description: Тип сообщения
+        timestamp:
+          type: integer
+          description: Время сообщения в формате Unix Timestamp
+        from:
+          type: string
+          description: Идентификатор отправителя в формате WhatsApp
+        to:
+          type: string
+          description: Идентификатор получателя в формате WhatsApp
+        isForwarded:
+          type: boolean
+          description: "Флаг, было ли сообщение перенаправлено"
+    ResponseAsync:
+      type: string
+    ResponseChat:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Идентификатор контакта или группы в формате WhatsApp
+        name:
+          type: string
+          description: Имя контакта или группы
+        isGroup:
+          type: boolean
+          description: Является ли чат контактом или группой
+        isReadOnly:
+          type: boolean
+          description: Является ли чат ReadOnly
+        unreadCount:
+          type: integer
+          description: Количество непрочитанных сообщений в чате
+        timestamp:
+          type: integer
+          description: Время последней активночти в чате
+        pinned:
+          type: boolean
+          description: Является ли чат закрепленным
+        isMuted:
+          type: boolean
+          description: Выключен ли у чата звук
+        muteExpiration:
+          type: boolean
+          description: "Время, оставшееся до включения звука"
+        groupMetadata:
+          $ref: '#/components/schemas/ResponseChat_groupMetadata'
+      example:
+        pinned: true
+        isReadOnly: true
+        name: name
+        unreadCount: 0
+        muteExpiration: true
+        id: id
+        groupMetadata:
+          owner: owner
+          size: 5
+          id: id
+          creation: 1
+          participants:
+          - isSuperAdmin: true
+            id: id
+            isAdmin: true
+          - isSuperAdmin: true
+            id: id
+            isAdmin: true
+        isGroup: true
+        isMuted: true
+        timestamp: 6
+    send_body:
+      required:
+      - WhatsappID
+      type: object
+      properties:
+        WhatsappID:
+          type: string
+          description: Service Whatsapp ID
+        async:
+          type: boolean
+          description: Async query returns Message Object
+        recipient:
+          anyOf:
+          - $ref: '#/components/schemas/recipientNum'
+          - $ref: '#/components/schemas/recipientId'
+        message:
+          anyOf:
+          - $ref: '#/components/schemas/messageText'
+          - $ref: '#/components/schemas/messageMedia'
+    inline_response_200:
+      type: object
+      properties:
+        result:
+          oneOf:
+          - $ref: '#/components/schemas/ResponseMessage'
+          - $ref: '#/components/schemas/ResponseAsync'
+      example:
+        result: ""
+    check_body:
+      type: object
+      properties:
+        WhatsappID:
+          type: string
+          description: Идентификатор Whatsapp ID
+        number:
+          type: string
+          description: Номер в формате 79999999999
+    inline_response_200_1:
+      type: object
+      properties:
+        result:
+          type: string
+          description: при удачном исполнении запроса содержит OK
+        data:
+          type: boolean
+          description: "результат проверки, true - зарегистрирован."
+      example:
+        result: result
+        data: true
+    getchats_body:
+      type: object
+      properties:
+        WhatsappID:
+          type: string
+          description: Идентификатор Whatsapp ID
+    inline_response_200_2:
+      type: object
+      properties:
+        result:
+          type: string
+          description: при удачном исполнении запроса содержит OK
+        data:
+          type: array
+          description: массив объектов ResponseChat
+          items:
+            $ref: '#/components/schemas/ResponseChat'
+      example:
+        result: result
+        data:
+        - pinned: true
+          isReadOnly: true
+          name: name
+          unreadCount: 0
+          muteExpiration: true
+          id: id
+          groupMetadata:
+            owner: owner
+            size: 5
+            id: id
+            creation: 1
+            participants:
+            - isSuperAdmin: true
+              id: id
+              isAdmin: true
+            - isSuperAdmin: true
+              id: id
+              isAdmin: true
+          isGroup: true
+          isMuted: true
+          timestamp: 6
+        - pinned: true
+          isReadOnly: true
+          name: name
+          unreadCount: 0
+          muteExpiration: true
+          id: id
+          groupMetadata:
+            owner: owner
+            size: 5
+            id: id
+            creation: 1
+            participants:
+            - isSuperAdmin: true
+              id: id
+              isAdmin: true
+            - isSuperAdmin: true
+              id: id
+              isAdmin: true
+          isGroup: true
+          isMuted: true
+          timestamp: 6
+    getmedia_body:
+      type: object
+      properties:
+        WhatsappID:
+          type: string
+          description: Идентификатор Whatsapp ID
+        mediaKey:
+          type: string
+          description: "Идентификатор медиафайла, содержится во входящих сообщения\
+            х."
+    inline_response_200_3:
+      type: object
+      properties:
+        result:
+          type: string
+          description: при удачном исполнении запроса содержит OK
+        media:
+          $ref: '#/components/schemas/media'
+      example:
+        result: result
+        media:
+          filename: filename
+          data: data
+          mimetype: application/ogg
+    seen_body:
+      type: object
+      properties:
+        WhatsappID:
+          type: string
+          description: Идентификатор Whatsapp ID
+        recipient:
+          anyOf:
+          - $ref: '#/components/schemas/recipientNum'
+          - $ref: '#/components/schemas/recipientId'
+    inline_response_200_4:
+      type: object
+      properties:
+        result:
+          type: string
+          description: при удачном исполнении запроса содержит OK
+      example:
+        result: result
+    ResponseChat_groupMetadata_participants:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Идентификатор контакта в формате WhatsApp
+        isAdmin:
+          type: boolean
+          description: Является ли участник администратором
+        isSuperAdmin:
+          type: boolean
+          description: Является ли участник суперадминистратором
+      example:
+        isSuperAdmin: true
+        id: id
+        isAdmin: true
+    ResponseChat_groupMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Идентификатор группы в формате WhatsApp
+        creation:
+          type: integer
+          description: Дата создания группы в формате Unix Time Stamp
+        owner:
+          type: string
+          description: Идентификатор создателя группы в формате WhatsApp
+        size:
+          type: integer
+          description: Количество участников в группе
+        participants:
+          type: array
+          description: Массив участников
+          items:
+            $ref: '#/components/schemas/ResponseChat_groupMetadata_participants'
+      description: "Метаданные группы, если чат является группой"
+      example:
+        owner: owner
+        size: 5
+        id: id
+        creation: 1
+        participants:
+        - isSuperAdmin: true
+          id: id
+          isAdmin: true
+        - isSuperAdmin: true
+          id: id
+          isAdmin: true
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      name: X-API-Key
+      in: header
